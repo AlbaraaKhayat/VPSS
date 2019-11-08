@@ -13,7 +13,7 @@ import dcgan_64 as model
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.0002, type=float, help='learning rate')
-parser.add_argument('--log_dir', default='../Log', help='base directory to save logs')
+parser.add_argument('--log_dir', default='./log', help='base directory to save logs')
 parser.add_argument('--beta1', default=0.9, type=float, help='momentum term for adam')
 parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
@@ -25,9 +25,10 @@ parser.add_argument('--channels', default=1, type=int)
 parser.add_argument('--n_past', type=int, default=2, help='number of frames to condition on')
 parser.add_argument('--n_future', type=int, default=3, help='number of frames to predict during training')
 parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
+parser.add_argument('--run', help='model name e.g. K5N2D123')
 
 opt = parser.parse_args()
-opt.log_dir = '%s/%s' % (opt.log_dir, 'movingmnist')
+opt.log_dir = '%s/%s' % (opt.log_dir, opt.run)
 
 if not os.path.exists('%s/gen/' % opt.log_dir):
     os.makedirs('%s/gen/' % opt.log_dir)
