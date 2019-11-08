@@ -28,6 +28,8 @@ parser.add_argument('--n_past', type=int, default=2, help='number of frames to c
 parser.add_argument('--n_future', type=int, default=3, help='number of frames to predict during training')
 parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
 parser.add_argument('--run', help='model name e.g. K5N2D123')
+parser.add_argument('--split', default='train', help='run type (train, test or spec)')
+
 
 opt = parser.parse_args()
 opt.log_dir = '%s/%s' % (opt.log_dir, opt.run)
@@ -124,7 +126,7 @@ discriminator_variables = [var for var in all_vars if var.name.startswith('discr
 gen_op = generator_optimizer.minimize(g_loss, var_list = generator_variables)
 dis_op = diccriminator_optimizer.minimize(d_loss, var_list = discriminator_variables) 
 
-train_mnist = mnist.mnist(True, batch_size = opt.batch_size, seq_len = (opt.n_past + opt.n_future), num_digits = opt.num_digits, image_size = opt.image_width)
+train_mnist = mnist.mnist(opt.split, batch_size = opt.batch_size, seq_len = (opt.n_past + opt.n_future), num_digits = opt.num_digits, image_size = opt.image_width)
 def get_training_batch():
     return train_mnist.getbatch()
 
