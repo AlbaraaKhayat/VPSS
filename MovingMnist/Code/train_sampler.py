@@ -7,9 +7,11 @@ import progressbar
 import numpy as np
 import tensorflow as tf
 import scipy.io as io
+import scipy.misc as misc
 import adaptive_conv as adaptive_conv
 from tensorflow.python import pywrap_tensorflow
 import dcgan_64 as model
+from sequence_generator import SequenceGenerator
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.0002, type=float, help='learning rate')
@@ -122,7 +124,6 @@ discriminator_variables = [var for var in all_vars if var.name.startswith('discr
 gen_op = generator_optimizer.minimize(g_loss, var_list = generator_variables)
 dis_op = diccriminator_optimizer.minimize(d_loss, var_list = discriminator_variables) 
 
-import moving_mnist as mnist
 train_mnist = mnist.mnist(True, batch_size = opt.batch_size, seq_len = (opt.n_past + opt.n_future), num_digits = opt.num_digits, image_size = opt.image_width)
 def get_training_batch():
     return train_mnist.getbatch()
@@ -135,7 +136,6 @@ def clear_progressbar():
     # moves up two lines again
     print("\033[2A")
     
-import scipy.misc as misc
 
 config = tf.ConfigProto()  
 config.gpu_options.allow_growth=True
