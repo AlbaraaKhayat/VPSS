@@ -3,14 +3,9 @@ import tensorflow as tf
 import threading
 import time
 import scipy.misc as misc
-import h5py
 import sys
 
-try:
-    f = h5py.File('../Data/mnist.h5','r')
-except:
-    print 'Please set the correct path to MNIST dataset'
-    sys.exit()
+
 x1 = f['train'].value.reshape(-1, 28, 28)
 x2 = f['test'].value.reshape(-1, 28, 28)
 f.close()
@@ -27,7 +22,6 @@ class MyThread(threading.Thread):
         self.num_digits = num_digits
         self.image_size = image_size
         self.digit_size = 28
-        self.deterministic = True
         self.channels = 1 
         self.data_slice = data_slice
 
@@ -49,7 +43,6 @@ class mnist(object):
         self.image_size = image_size
         self.batch_size = batch_size
         self.digit_size = 28
-        self.deterministic = True
         self.channels = 1 
 
     def getbatch(self):
