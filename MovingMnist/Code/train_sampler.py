@@ -37,7 +37,7 @@ if not os.path.exists('%s/gen/' % opt.log_dir):
     os.makedirs('%s/gen/' % opt.log_dir)
 print(opt)
 
-sources = sources(self, seq_len = opt.n_past+opt.n_future, split=opt.split,
+sources = getsources(self, seq_len = opt.n_past+opt.n_future, split=opt.split,
                  DATA_DIR=DATA_DIR, 
                  batch_size=opt.batch_size,
                  latency = 321, 
@@ -162,7 +162,7 @@ for epoch in range(opt.niter):
     epoch_kld = 0
     progress = progressbar.ProgressBar(maxval=opt.epoch_size).start()
 
-    train_batch = get_training_batch()
+    train_batch = get_training_batch(sources=sources)
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, kernel_eval \
     = sess.run([pred_array, gen0_array, gen1_array, gen2_array, gen3_array, gen4_array, kernel], feed_dict = {train_x:train_batch})
 
@@ -202,11 +202,11 @@ for epoch in range(opt.niter):
         
     for i in range(opt.epoch_size):
         progress.update(i+1)
-        train_batch = get_training_batch()
+        train_batch = get_training_batch(sources=sources)
         dr_eval, df_eval, mask_eval, _ = sess.run([d_loss_real, d_loss_fake, mask, dis_op], feed_dict = {train_x:train_batch})
         print 'dis ', dr_eval, df_eval, mask_eval[:,0,0,0,0]
 
-        train_batch = get_training_batch()
+        train_batch = get_training_batch(sources=sources)
         g_eval, mask_eval, _ = sess.run([g_loss, mask, gen_op], feed_dict = {train_x:train_batch})
         print 'gen ', g_eval, mask_eval[:,0,0,0,0]
 
@@ -215,7 +215,7 @@ for epoch in range(opt.niter):
     if epoch % 10 == 0:
         saver.save(sess, opt.log_dir + "/model.ckpt", global_step=epoch)
         
-def sources(self, seq_len = 30,split='train',
+def getsources(self, seq_len = 20,split='train',
                  DATA_DIR=None, 
                  batch_size=1,
                  latency = 321, 
