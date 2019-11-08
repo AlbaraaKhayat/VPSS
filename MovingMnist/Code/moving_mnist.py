@@ -39,30 +39,6 @@ class MyThread(threading.Thread):
             idx = np.random.randint(self.N)
             digit = misc.imresize(self.data[idx], [self.digit_size, self.digit_size])
 
-            sx = np.random.randint(image_size-digit_size)
-            sy = np.random.randint(image_size-digit_size)
-            dx = np.random.randint(-3, 4)
-            dy = np.random.randint(-3, 4)
-            for t in range(self.seq_len):
-                if sy < 0:
-                    sy = 0 
-                    dy = -dy
-                elif sy >= image_size-digit_size:
-                    sy = image_size-digit_size-1
-                    dy = -dy
-                if sx < 0:
-                    sx = 0 
-                    dx = -dx
-                elif sx >= image_size-digit_size:
-                    sx = image_size-digit_size-1
-                    dx = -dx
-                   
-                x[t, sy:sy+digit_size, sx:sx+digit_size, 0] += digit
-                sy += dy
-                sx += dx
-
-        x[x>=1] = 1.
-        x[x<0] = 0.
         data_array[self.data_slice, 0:self.seq_len] = x
 
 class mnist(object):
