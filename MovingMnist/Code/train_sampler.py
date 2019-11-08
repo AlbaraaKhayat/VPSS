@@ -1,6 +1,5 @@
 import argparse
 import os, datetime
-import random
 import utils
 import itertools
 import progressbar
@@ -11,7 +10,6 @@ import scipy.misc as misc
 import adaptive_conv as adaptive_conv
 from tensorflow.python import pywrap_tensorflow
 import dcgan_64 as model
-from sequence_generator import SequenceGenerator
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.0002, type=float, help='learning rate')
@@ -30,6 +28,7 @@ parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
 parser.add_argument('--run', help='model name e.g. K5N2D123')
 parser.add_argument('--split', default='train', help='run type (train, test or spec)')
 
+DATA_DIR = ''
 
 opt = parser.parse_args()
 opt.log_dir = '%s/%s' % (opt.log_dir, opt.run)
@@ -37,6 +36,15 @@ opt.log_dir = '%s/%s' % (opt.log_dir, opt.run)
 if not os.path.exists('%s/gen/' % opt.log_dir):
     os.makedirs('%s/gen/' % opt.log_dir)
 print(opt)
+
+sources = sources(self, seq_len = opt.n_past+opt.n_future, split=opt.split,
+                 DATA_DIR=DATA_DIR, 
+                 batch_size=opt.batch_size,
+                 latency = 321, 
+                 shuffle=True, 
+                 skip=1,
+                 sequence_start_mode='all', 
+                 N_seq=None)
 
 discriminator = model.encoder_D(opt.g_dim, opt.channels, name = 'discriminator')
 adap_conv = adaptive_conv.adap_conv(name = 'adap_conv')
