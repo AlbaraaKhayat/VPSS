@@ -5,18 +5,12 @@ import time
 import scipy.misc as misc
 import sys
 
-
-x1 = f['train'].value.reshape(-1, 28, 28)
-x2 = f['test'].value.reshape(-1, 28, 28)
-f.close()
 data_array = np.zeros((100, 30, 64, 64, 1),dtype=np.float32)
 class MyThread(threading.Thread):
     def __init__(self, train, seq_len = 30, num_digits = 1, image_size = 64, data_slice = -1):
         super(MyThread, self).__init__()  
-        if train:
-            self.data = x1
-        else:
-            self.data = x2
+
+        self.data = Xall
         self.N = self.data.shape[0]
         self.seq_len = seq_len
         self.num_digits = num_digits
