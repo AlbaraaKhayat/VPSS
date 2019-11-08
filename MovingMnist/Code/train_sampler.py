@@ -206,6 +206,74 @@ for epoch in range(opt.niter):
     clear_progressbar()
     if epoch % 10 == 0:
         saver.save(sess, opt.log_dir + "/model.ckpt", global_step=epoch)
-
-    
         
+def sources(self, seq_len = 30,split='train',
+                 DATA_DIR=None, 
+                 batch_size=1,
+                 latency = 321, 
+                 shuffle=True, 
+                 skip=1,
+                 sequence_start_mode='all', 
+                 N_seq=None):
+    
+    self.train = split
+    self.nt = seq_len
+    self.dms = 1
+    self.latency = latency # Allowed time between frames
+    self.DATA_DIR = DATA_DIR
+    self.split = split
+    self.skip = skip 
+    self.sequence_start_mode = sequence_start_mode
+    self.sources = np.load(os.path.join(self.DATA_DIR, 'meta', 'abha_train_source_list.npz')) 
+    self.paths = sorted(self.sources['paths'])
+    self.cnt = np.copy(self.paths)
+    self.sources = sorted(self.sources['days'])
+
+    for i in range(len(self.paths)):
+        self.cnt[i] = int(self.paths[i][-10:-8])*3600 + int(self.paths[i][-8:-6]) * 60 + int(self.paths[i][-6:-4])
+    
+    if self.split == 'train':
+        k = self.seq_len
+    else: k = 1
+
+    if self.sequence_start_mode == 'all':  
+        idx = 0
+        possible_starts = []
+        while idx < (len(self.paths) - self.nt *self.skip * self.dms + 1):
+            if self.sources[idx] == self.sources[idx + self.nt *self.skip * self.dms - 1]:
+                if (int(self.cnt[idx + self.nt *self.skip * self.dms - 1]) - int(self.cnt[idx])) < (self.nt *self.skip * self.dms - 1) * self.latency:
+                    possible_starts.append(idx)
+                    idx += 1
+                else:
+                    idx += 1
+            else: idx += 1    
+
+    elif self.sequence_start_mode == 'unique':  
+        idx = 0
+        possible_starts = []
+        while idx < (len(self.paths) - self.nt *self.skip * self.dms + 1):
+            if self.sources[idx] == self.sources[idx + self.nt *self.skip * self.dms - 1]:
+                if (int(self.cnt[idx + self.nt *self.skip * self.dms - 1]) - int(self.cnt[idx])) < (self.nt *self.skip * self.dms - 1) * self.latency:
+                    possible_starts.append(idx)
+                    idx += k * self.dms *self.skip 
+                else:
+                    idx += 1
+            else: idx += 1
+
+    if self.split == 'train':
+        self.possible_starts = possible_starts
+    if self.split == 'spec':
+        self.possible_starts = list(range(61326,61613))     #20140329
+        self.possible_starts += list(range(157981,158268))  #20160413
+        self.possible_starts += list(range(158268,158555))  #20160414
+        self.possible_starts += list(range(198103,198374))  #20170214
+        self.possible_starts += list(range(198630,198896))  #20170217
+    if shuffle:
+        self.possible_starts = np.random.permutation(self.possible_starts)
+    if N_seq is not None and len(self.possible_starts) > N_seq:  
+        self.possible_starts = self.possible_starts[:N_seq]  
+    print(split+': ',len(self.possible_starts))
+    return self.possible_starts
+
+
+
