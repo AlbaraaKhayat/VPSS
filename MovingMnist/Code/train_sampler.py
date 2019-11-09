@@ -10,6 +10,7 @@ import scipy.misc as misc
 import adaptive_conv as adaptive_conv
 from tensorflow.python import pywrap_tensorflow
 import dcgan_64 as model
+import moving_mnist as mnist
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.0002, type=float, help='learning rate')
@@ -19,10 +20,10 @@ parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
 parser.add_argument('--niter', type=int, default=302, help='number of epochs to train for')
 parser.add_argument('--seed', default=1, type=int, help='manual seed')
-parser.add_argument('--image_width', type=int, default=64)
+parser.add_argument('--image_width', type=int, default=160)
 parser.add_argument('--channels', default=1, type=int)
-parser.add_argument('--n_past', type=int, default=2, help='number of frames to condition on')
-parser.add_argument('--n_future', type=int, default=3, help='number of frames to predict during training')
+parser.add_argument('--n_past', type=int, default=10, help='number of frames to condition on')
+parser.add_argument('--n_future', type=int, default=10, help='number of frames to predict during training')
 parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
 parser.add_argument('--run', help='test model name e.g. K5N2D123')
 parser.add_argument('--split', default='train', help='run type (train, test or spec)')
@@ -36,14 +37,7 @@ if not os.path.exists('%s/gen/' % opt.log_dir):
     os.makedirs('%s/gen/' % opt.log_dir)
 print(opt)
 
-sources = getsources(self, seq_len = opt.n_past+opt.n_future, split=opt.split,
-                 DATA_DIR=DATA_DIR, 
-                 batch_size=opt.batch_size,
-                 latency = 321, 
-                 shuffle=True, 
-                 skip=1,
-                 sequence_start_mode='all', 
-                 N_seq=None)
+
 
 discriminator = model.encoder_D(opt.g_dim, opt.channels, name = 'discriminator')
 adap_conv = adaptive_conv.adap_conv(name = 'adap_conv')
