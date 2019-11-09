@@ -140,8 +140,8 @@ train_mnist = mnist.mnist(  opt.split,
                             num_digits = opt.num_digits,
                             image_size = opt.image_width )
 
-def get_training_batch(idx=None):
-    return train_mnist.getbatch(idx)
+def get_training_batch(eid=None):
+    return train_mnist.getbatch(eid)
 
 def clear_progressbar():
     # moves up 3 lines
@@ -167,7 +167,7 @@ for epoch in range(opt.niter):
     epoch_kld = 0
     progress = progressbar.ProgressBar(maxval=opt.epoch_size).start()
 
-    train_batch1 = get_training_batch(idx=None)
+    train_batch1 = get_training_batch(eid=None)
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, kernel_eval \
     = sess.run([pred_array, gen0_array, gen1_array, gen2_array, gen3_array, gen4_array, kernel], feed_dict = {train_x:train_batch1})
 
@@ -207,11 +207,11 @@ for epoch in range(opt.niter):
         
     for i in range(opt.epoch_size):
         progress.update(i+1)
-        train_batch2 = get_training_batch(idx = i)
+        train_batch2 = get_training_batch(eid = i)
         dr_eval, df_eval, mask_eval, _ = sess.run([d_loss_real, d_loss_fake, mask, dis_op], feed_dict = {train_x:train_batch2})
         print 'dis ', dr_eval, df_eval, mask_eval[:,0,0,0,0]
 
-        train_batch3 = get_training_batch(idx = i+1)
+        train_batch3 = get_training_batch(eid = i+1)
         g_eval, mask_eval, _ = sess.run([g_loss, mask, gen_op], feed_dict = {train_x:train_batch3})
         print 'gen ', g_eval, mask_eval[:,0,0,0,0]
 
