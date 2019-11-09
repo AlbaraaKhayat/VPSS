@@ -5,20 +5,20 @@ import os
 data_array = np.zeros((10, 30, 160, 160, 1),dtype=np.float32)
 
 class MyThread(threading.Thread):
-    def __init__(self, seq_len = 30, image_size = 160, eid = None, batch_n = -1):
+    def __init__(self, starts=None, paths=None, seq_len = 30, image_size = 160, eid = None, batch_n = -1):
 
         super(MyThread, self).__init__()  
-        self.data = Xall
-        self.N = length of possible start
         self.seq_len = seq_len
         self.image_size = image_size
         self.channels = 1 
         self.batch_n = batch_n
-        self.eid
-
+        self.eid = eid
+        self.starts, self.paths = starts, paths
+        
     def run(self):
-        x = np.zeros((self.seq_len,self.image_size, self.image_size, self.channels),dtype=np.float32)     
-        digit = self.data[eid]
+        x = np.zeros((self.seq_len, self.image_size, self.image_size, self.channels),dtype=np.float32)   
+        
+        digit = self.data[self.eid+self.batch_n]
         data_array[self.batch_n, 0:self.seq_len] = x
 
 class mnist(object):
@@ -42,10 +42,13 @@ class mnist(object):
         
     def getbatch(self, eid=None):
         # data_array = np.zeros((10, 20, 160, 160, 1),dtype=np.float32)
-        self.eid = eid
         th_pool = []
         for i in range(self.batch_size):
-            th = MyThread(seq_len = self.seq_len, image_size = self.image_size, eid = eid, batch_n = i)
+            th = MyThread(starts = self.starts,
+                          paths = self.paths, 
+                          seq_len = self.seq_len, 
+                          image_size = self.image_size, 
+                          eid = eid, batch_n = i)
             th.start()
             th_pool.append(th)
         for i in range(self.batch_size):
@@ -64,7 +67,6 @@ class mnist(object):
                  sequence_start_mode='all', 
                  N_seq=None):
 
-        self.train = split
         self.nt = seq_len
         self.dms = 1
         self.latency = latency # Allowed time between frames
