@@ -19,13 +19,12 @@ parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
 parser.add_argument('--niter', type=int, default=302, help='number of epochs to train for')
 parser.add_argument('--seed', default=1, type=int, help='manual seed')
-parser.add_argument('--epoch_size', type=int, default=600, help='epoch size')
-parser.add_argument('--image_width', type=int, default=64, help='the height / width of the input image to network')
+parser.add_argument('--image_width', type=int, default=64)
 parser.add_argument('--channels', default=1, type=int)
 parser.add_argument('--n_past', type=int, default=2, help='number of frames to condition on')
 parser.add_argument('--n_future', type=int, default=3, help='number of frames to predict during training')
 parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
-parser.add_argument('--run', help='model name e.g. K5N2D123')
+parser.add_argument('--run', help='test model name e.g. K5N2D123')
 parser.add_argument('--split', default='train', help='run type (train, test or spec)')
 
 DATA_DIR = ''
@@ -165,7 +164,7 @@ wu = 0
 for epoch in range(opt.niter):
     epoch_mse = 0
     epoch_kld = 0
-    progress = progressbar.ProgressBar(maxval=opt.epoch_size).start()
+    progress = progressbar.ProgressBar(maxval=len(train_mnist.starts)).start()
 
     train_batch1 = get_training_batch(eid=None)
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, kernel_eval \
@@ -205,7 +204,7 @@ for epoch in range(opt.niter):
         ori = np.stack([ori,0 * gen ,gen], axis = -1)
         misc.imsave(opt.log_dir+'/gen/'+str(epoch)+'/'+str(i)+'/ori_'+str(i+2)+'.png', np.cast[np.uint8](ori*255.0))
         
-    for i in range(opt.epoch_size):
+    for i in range(len(train_mnist.starts)):
         progress.update(i+1)
         train_batch2 = get_training_batch(eid = i)
         dr_eval, df_eval, mask_eval, _ = sess.run([d_loss_real, d_loss_fake, mask, dis_op], feed_dict = {train_x:train_batch2})
