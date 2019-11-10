@@ -1,6 +1,5 @@
 import argparse
 import os, datetime
-import random
 import utils
 import itertools
 import progressbar
@@ -10,18 +9,20 @@ import scipy.io as io
 import adaptive_conv as adaptive_conv
 from tensorflow.python import pywrap_tensorflow
 import dcgan_64 as model
+import scipy.misc as misc
+import moving_mnist as mnist
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.0002, type=float, help='learning rate')
 parser.add_argument('--log_dir', default='../Log', help='base directory to save logs')
 parser.add_argument('--beta1', default=0.9, type=float, help='momentum term for adam')
-parser.add_argument('--batch_size', default=8, type=int, help='batch size')
+parser.add_argument('--batch_size', default=2, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
-parser.add_argument('--niter', type=int, default=302, help='number of epochs to train for')
-parser.add_argument('--seed', default=1, type=int, help='manual seed')
-parser.add_argument('--image_width', type=int, default=64, help='the height / width of the input image to network')
+parser.add_argument('--niter', type=int, default=2, help='number of epochs to train for')
+parser.add_argument('--seed', default=123, type=int, help='manual seed')
+parser.add_argument('--image_width', type=int, default=160, help='the height / width of the input image to network')
 parser.add_argument('--channels', default=1, type=int)
-parser.add_argument('--n_past', type=int, default=2, help='number of frames to condition on')
+parser.add_argument('--n_past', type=int, default=10, help='number of frames to condition on')
 parser.add_argument('--n_future', type=int, default=10, help='number of frames to predict during training')
 parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
 parser.add_argument('--restore_dir', default='../Log/movingmnist/model.ckpt-300', help='pretrained model path')
@@ -29,10 +30,11 @@ parser.add_argument('--run', help='test model name e.g. K5N2D123')
 parser.add_argument('--split', default='train', help='run type (train, test or spec)')
 
 
+DATA_DIR = '../../data/'
 
 opt = parser.parse_args()
 opt.log_dir = '%s/%s' % (opt.log_dir, 'movingmnist')
-
+np.random.seed(opt.seed)
 if not os.path.exists('%s/gen/' % opt.log_dir):
     os.makedirs('%s/gen/' % opt.log_dir)
 print(opt)
@@ -164,11 +166,15 @@ all_vars = tf.trainable_variables()
 pred_variables = [var for var in all_vars if var.name.startswith('forward_net')]
 pre_op = pred_optimizer.minimize(bce_loss, var_list = pred_variables) 
 
-import moving_mnist as mnist
-train_mnist = mnist.mnist(True, batch_size = opt.batch_size, seq_len = (opt.n_past + opt.n_future), num_digits = opt.num_digits, image_size = opt.image_width)
+train_mnist = mnist.mnist(  split = opt.split,
+                            batch_size = opt.batch_size,
+                            seq_len = (opt.n_past + opt.n_future), 
+                            image_size = opt.image_width, 
+                            DATA_DIR = DATA_DIR )
 
-def get_training_batch():
-    return train_mnist.getbatch()
+
+def get_training_batch(eid = None):
+    return train_mnist.getbatch(eid)
 
 def clear_progressbar():
     # moves up 3 lines
@@ -178,7 +184,7 @@ def clear_progressbar():
     # moves up two lines again
     print("\033[2A")
     
-import scipy.misc as misc
+
 
 config = tf.ConfigProto()  
 config.gpu_options.allow_growth=True
@@ -200,7 +206,7 @@ saver_res2=tf.train.Saver(saver_params)
 saver_res2.restore(sess,opt.restore_dir)
 
 for epoch in range(opt.niter):
-    progress = progressbar.ProgressBar(maxval=maxval=len(train_mnist.starts)).start()
+    progress = progressbar.ProgressBar(maxval=len(train_mnist.starts)).start()
 
     train_batch = get_training_batch(eid=np.random.randint(len(train_mnist.starts)))
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, selector_pred_eval \
@@ -241,7 +247,7 @@ for epoch in range(opt.niter):
         ori = np.stack([ori, 0 * gen ,gen], axis = -1)
         misc.imsave(opt.log_dir+'/gen/'+str(epoch)+'/'+str(i)+'/ori_'+str(i+2)+'.png', np.cast[np.uint8](ori*255.0))
         
-    for i in range(maxval=len(train_mnist.starts)):
+    for i in range(len(train_mnist.starts)):
         progress.update(i+1)
         train_batch_ = get_training_batch(eid = i)
         bce_eval, _ = sess.run([bce_loss, pre_op], feed_dict = {train_x:train_batch})
