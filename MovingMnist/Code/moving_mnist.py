@@ -82,7 +82,6 @@ class mnist(object):
   
     
     def getbatch(self, eid=None):
-
         th_pool = []
         for i in range(self.batch_size):
             th = MyThread(starts = self.starts,
@@ -100,7 +99,6 @@ class mnist(object):
     
    
     def getsources(self):
-
         self.sources = np.load(os.path.join(self.DATA_DIR, 'meta', 'abha_train_source_list.npz')) 
         self.paths = sorted(self.sources['paths'])
         self.cnt = np.copy(self.paths)
