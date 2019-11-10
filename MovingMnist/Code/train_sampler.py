@@ -14,7 +14,7 @@ import moving_mnist as mnist
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.0002, type=float, help='learning rate')
-parser.add_argument('--log_dir', default='./log', help='base directory to save logs')
+parser.add_argument('--log_dir', default='../log', help='base directory to save logs')
 parser.add_argument('--beta1', default=0.9, type=float, help='momentum term for adam')
 parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
@@ -130,11 +130,10 @@ dis_op = diccriminator_optimizer.minimize(d_loss, var_list = discriminator_varia
 train_mnist = mnist.mnist(  split = opt.split,
                             batch_size = opt.batch_size,
                             seq_len = (opt.n_past + opt.n_future), 
-                            num_digits = opt.num_digits,
                             image_size = opt.image_width, 
                             DATA_DIR = DATA_DIR )
 
-def get_training_batch(eid=None):
+def get_training_batch(eid = None):
     return train_mnist.getbatch(eid)
 
 def clear_progressbar():
