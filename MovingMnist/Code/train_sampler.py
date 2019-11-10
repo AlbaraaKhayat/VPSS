@@ -160,7 +160,7 @@ for epoch in range(opt.niter):
     epoch_kld = 0
     progress = progressbar.ProgressBar(maxval=len(train_mnist.starts)).start()
 
-    train_batch1 = get_training_batch(eid=None)
+    train_batch1 = get_training_batch(eid=np.random.randint(len(train_mnist.starts)))
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, kernel_eval \
     = sess.run([pred_array, gen0_array, gen1_array, gen2_array, gen3_array, gen4_array, kernel], feed_dict = {train_x:train_batch1})
 
