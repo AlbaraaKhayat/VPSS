@@ -18,8 +18,8 @@ parser.add_argument('--log_dir', default='./log', help='base directory to save l
 parser.add_argument('--beta1', default=0.9, type=float, help='momentum term for adam')
 parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
-parser.add_argument('--niter', type=int, default=302, help='number of epochs to train for')
-parser.add_argument('--seed', default=1, type=int, help='manual seed')
+parser.add_argument('--niter', type=int, default=10, help='number of epochs to train for')
+parser.add_argument('--seed', default=123, type=int, help='manual seed')
 parser.add_argument('--image_width', type=int, default=160)
 parser.add_argument('--channels', default=1, type=int)
 parser.add_argument('--n_past', type=int, default=10, help='number of frames to condition on')
@@ -28,11 +28,12 @@ parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
 parser.add_argument('--run', help='test model name e.g. K5N2D123')
 parser.add_argument('--split', default='train', help='run type (train, test or spec)')
 
-DATA_DIR = ''
+
 
 opt = parser.parse_args()
+DATA_DIR = '../../data/'
 opt.log_dir = '%s/%s' % (opt.log_dir, opt.run)
-
+np.random.seed(opt.seed)
 if not os.path.exists('%s/gen/' % opt.log_dir):
     os.makedirs('%s/gen/' % opt.log_dir)
 print(opt)
@@ -127,11 +128,12 @@ discriminator_variables = [var for var in all_vars if var.name.startswith('discr
 gen_op = generator_optimizer.minimize(g_loss, var_list = generator_variables)
 dis_op = diccriminator_optimizer.minimize(d_loss, var_list = discriminator_variables) 
 
-train_mnist = mnist.mnist(  opt.split,
+train_mnist = mnist.mnist(  split = opt.split,
                             batch_size = opt.batch_size,
                             seq_len = (opt.n_past + opt.n_future), 
                             num_digits = opt.num_digits,
-                            image_size = opt.image_width )
+                            image_size = opt.image_width, 
+                            DATA_DIR = DATA_DIR )
 
 def get_training_batch(eid=None):
     return train_mnist.getbatch(eid)
