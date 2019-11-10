@@ -29,7 +29,6 @@ parser.add_argument('--run', help='test model name e.g. K5N2D123')
 parser.add_argument('--split', default='train', help='run type (train, test or spec)')
 
 
-
 opt = parser.parse_args()
 DATA_DIR = '../../data/'
 opt.log_dir = '%s/%s' % (opt.log_dir, opt.run)
