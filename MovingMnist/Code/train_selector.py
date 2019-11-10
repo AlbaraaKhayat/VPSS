@@ -19,13 +19,16 @@ parser.add_argument('--batch_size', default=8, type=int, help='batch size')
 parser.add_argument('--optimizer', default='adam', help='optimizer to train with')
 parser.add_argument('--niter', type=int, default=302, help='number of epochs to train for')
 parser.add_argument('--seed', default=1, type=int, help='manual seed')
-parser.add_argument('--epoch_size', type=int, default=600, help='epoch size')
 parser.add_argument('--image_width', type=int, default=64, help='the height / width of the input image to network')
 parser.add_argument('--channels', default=1, type=int)
 parser.add_argument('--n_past', type=int, default=2, help='number of frames to condition on')
 parser.add_argument('--n_future', type=int, default=10, help='number of frames to predict during training')
 parser.add_argument('--model', default='dcgan', help='model type (dcgan | vgg)')
 parser.add_argument('--restore_dir', default='../Log/movingmnist/model.ckpt-300', help='pretrained model path')
+parser.add_argument('--run', help='test model name e.g. K5N2D123')
+parser.add_argument('--split', default='train', help='run type (train, test or spec)')
+
+
 
 opt = parser.parse_args()
 opt.log_dir = '%s/%s' % (opt.log_dir, 'movingmnist')
@@ -197,9 +200,9 @@ saver_res2=tf.train.Saver(saver_params)
 saver_res2.restore(sess,opt.restore_dir)
 
 for epoch in range(opt.niter):
-    progress = progressbar.ProgressBar(maxval=opt.epoch_size).start()
+    progress = progressbar.ProgressBar(maxval=maxval=len(train_mnist.starts)).start()
 
-    train_batch = get_training_batch()
+    train_batch = get_training_batch(eid=np.random.randint(len(train_mnist.starts)))
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, selector_pred_eval \
     = sess.run([pred_array, gen0_array, gen1_array, gen2_array, gen3_array, gen4_array, selector_pred], feed_dict = {train_x:train_batch})
     if not os.path.exists(opt.log_dir+'/gen/'+str(epoch)):
@@ -238,15 +241,15 @@ for epoch in range(opt.niter):
         ori = np.stack([ori, 0 * gen ,gen], axis = -1)
         misc.imsave(opt.log_dir+'/gen/'+str(epoch)+'/'+str(i)+'/ori_'+str(i+2)+'.png', np.cast[np.uint8](ori*255.0))
         
-    for i in range(opt.epoch_size):
+    for i in range(maxval=len(train_mnist.starts)):
         progress.update(i+1)
-        train_batch_ = get_training_batch()
+        train_batch_ = get_training_batch(eid = i)
         bce_eval, _ = sess.run([bce_loss, pre_op], feed_dict = {train_x:train_batch})
         print 'gen ', bce_eval
+        
     progress.finish()
     clear_progressbar()
-    if epoch % 10 == 0:
-        saver.save(sess, opt.log_dir + "/model.ckpt", global_step=epoch)
+    saver.save(sess, opt.log_dir + "/model.ckpt", global_step=epoch)
 
     
         
