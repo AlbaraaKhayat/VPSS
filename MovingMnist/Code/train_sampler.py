@@ -161,9 +161,9 @@ for epoch in range(opt.niter):
     epoch_kld = 0
     progress = progressbar.ProgressBar(maxval=len(train_mnist.starts)).start()
 
-    train_batch1 = get_training_batch(eid=np.random.randint(len(train_mnist.starts)))
+    train_batch = get_training_batch(eid=np.random.randint(len(train_mnist.starts)))
     pred_array_eval, gen0_array_eval, gen1_array_eval, gen2_array_eval, gen3_array_eval, gen4_array_eval, kernel_eval \
-    = sess.run([pred_array, gen0_array, gen1_array, gen2_array, gen3_array, gen4_array, kernel], feed_dict = {train_x:train_batch1})
+    = sess.run([pred_array, gen0_array, gen1_array, gen2_array, gen3_array, gen4_array, kernel], feed_dict = {train_x:train_batch})
 
     if not os.path.exists(opt.log_dir+'/gen/'+str(epoch)):
         os.mkdir(opt.log_dir+'/gen/'+str(epoch))
@@ -201,18 +201,17 @@ for epoch in range(opt.niter):
         
     for i in range(len(train_mnist.starts)):
         progress.update(i+1)
-        train_batch2 = get_training_batch(eid = i)
-        dr_eval, df_eval, mask_eval, _ = sess.run([d_loss_real, d_loss_fake, mask, dis_op], feed_dict = {train_x:train_batch2})
+        train_batch = get_training_batch(eid = i)
+        dr_eval, df_eval, mask_eval, _ = sess.run([d_loss_real, d_loss_fake, mask, dis_op], feed_dict = {train_x:train_batch})
         print 'dis ', dr_eval, df_eval, mask_eval[:,0,0,0,0]
 
-        train_batch3 = get_training_batch(eid = i+1)
-        g_eval, mask_eval, _ = sess.run([g_loss, mask, gen_op], feed_dict = {train_x:train_batch3})
+#        train_batch = get_training_batch(eid = i)
+        g_eval, mask_eval, _ = sess.run([g_loss, mask, gen_op], feed_dict = {train_x:train_batch})
         print 'gen ', g_eval, mask_eval[:,0,0,0,0]
 
     progress.finish()
     clear_progressbar()
-    if epoch % 10 == 0:
-        saver.save(sess, opt.log_dir + "/model.ckpt", global_step=epoch)
+    saver.save(sess, opt.log_dir + "/model.ckpt", global_step=epoch)
         
 
 
