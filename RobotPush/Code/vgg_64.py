@@ -110,10 +110,12 @@ class encoder_G(object):
 class decoder_G(object):
     def __init__(self, name):
         self.name = name
+        
     def forward(self, vec, skip):
         vec = tf.expand_dims(tf.expand_dims(vec, axis = -2), axis = -2)
         with tf.variable_scope(self.name, reuse = tf.AUTO_REUSE):
             print 'de-input', vec.get_shape()
+
             output1 = init_conv2d(vec, 256, name = 'convt1')
             
             print 'de-output1', output1.get_shape()
@@ -151,6 +153,7 @@ class encoder_D(object):
     def forward(self, input):
         with tf.variable_scope(self.name, reuse=tf.AUTO_REUSE):
             print 'de1',input.get_shape()
+
             output1 = tf.layers.conv2d(inputs = input, filters = self.nf,
                                        kernel_size = (4,4), strides=(2, 2), padding='same', use_bias=True,
                                        kernel_initializer=tf.random_normal_initializer(0.0,0.02),
@@ -199,11 +202,13 @@ class encoder_D(object):
             output16 = tf.layers.dense(inputs = tf.reshape(output15, [-1, self.dim]),
                                        units = 1, use_bias=True, kernel_initializer=tf.random_normal_initializer(0.0,0.02),
                                        bias_initializer=tf.zeros_initializer())
+
             print 'de7',output16.get_shape()
             return output16
 
 class feat_D(object):
     def __init__(self):
         pass
+    
     def froward(self):
         pass
