@@ -2,38 +2,81 @@ import tensorflow as tf
 
 def _conv2d(input, out_channel, name = None):
     with tf.variable_scope(name, reuse = tf.AUTO_REUSE):
-        output1 = tf.layers.conv2d(inputs = input, filters = out_channel, kernel_size = (3,3), strides=(1, 1), padding='same', use_bias=True, kernel_initializer=tf.random_normal_initializer(0.0,0.02), bias_initializer=tf.zeros_initializer(), name = 'c1')
-        output2 = tf.layers.batch_normalization(output1, training = True, momentum=0.9, gamma_initializer = tf.random_normal_initializer(1.0,0.02), beta_initializer = tf.zeros_initializer(), name = 'b1')
+
+        output1 = tf.layers.conv2d(inputs = input, filters = out_channel,
+                                   kernel_size = (3,3), strides=(1, 1),
+                                   padding='same', use_bias=True,
+                                   kernel_initializer=tf.random_normal_initializer(0.0,0.02),
+                                   bias_initializer=tf.zeros_initializer(), 
+                                   name = 'c1')
+
+        output2 = tf.layers.batch_normalization(output1, training = True, momentum=0.9,
+                                                gamma_initializer = tf.random_normal_initializer(1.0,0.02), 
+                                                beta_initializer = tf.zeros_initializer(), 
+                                                name = 'b1')
+
         output3 = tf.nn.leaky_relu(output2, alpha=0.2, name='l1')
+        
         return output3
 
 def final_conv2d(input, out_channel, name = None):
     with tf.variable_scope(name, reuse = tf.AUTO_REUSE):
-        output1 = tf.layers.conv2d(inputs = input, filters = out_channel, kernel_size = (4,4), strides=(1, 1), padding='valid', use_bias=True, kernel_initializer=tf.random_normal_initializer(0.0,0.02), bias_initializer=tf.zeros_initializer(), name = 'c1')
-        output2 = tf.layers.batch_normalization(output1, training = True, momentum=0.9, gamma_initializer = tf.random_normal_initializer(1.0,0.02), beta_initializer = tf.zeros_initializer(), name = 'b1')
+
+        output1 = tf.layers.conv2d(inputs = input, filters = out_channel,
+                                   kernel_size = (4,4), strides=(1, 1),
+                                   padding='valid', use_bias=True,
+                                   kernel_initializer=tf.random_normal_initializer(0.0,0.02),
+                                   bias_initializer=tf.zeros_initializer(),
+                                   name = 'c1')
+        
+        output2 = tf.layers.batch_normalization(output1, training = True, momentum=0.9,
+                                                gamma_initializer = tf.random_normal_initializer(1.0,0.02),
+                                                beta_initializer = tf.zeros_initializer(),
+                                                name = 'b1')
+        
         output3 = tf.nn.tanh(output2, name='t1')
+        
         return tf.squeeze(tf.squeeze(output2, axis = -2), axis = -2), output3
 
-def init_conv2d(input, out_channel, name = None):
+def init_conv2d(input, out_channel, name = None): 
     with tf.variable_scope(name, reuse = tf.AUTO_REUSE):
-        output1 = tf.layers.conv2d_transpose(inputs = input, filters = out_channel, kernel_size = (4,4), strides=(1, 1), padding='valid', use_bias=True, kernel_initializer=tf.random_normal_initializer(0.0,0.02), bias_initializer=tf.zeros_initializer(), name = 'c1')
-        output2 = tf.layers.batch_normalization(output1, training = True, momentum=0.9, gamma_initializer = tf.random_normal_initializer(1.0,0.02), beta_initializer = tf.zeros_initializer(), name = 'b1')
+    
+        output1 = tf.layers.conv2d_transpose(inputs = input, filters = out_channel,
+                                             kernel_size = (4,4), strides=(1, 1),
+                                             padding='valid', use_bias=True,
+                                             kernel_initializer=tf.random_normal_initializer(0.0,0.02),
+                                             bias_initializer=tf.zeros_initializer(), 
+                                             name = 'c1')
+
+        output2 = tf.layers.batch_normalization(output1, training = True, momentum=0.9,
+                                                gamma_initializer = tf.random_normal_initializer(1.0,0.02), 
+                                                beta_initializer = tf.zeros_initializer(), 
+                                                name = 'b1')
+        
         output3 = tf.nn.leaky_relu(output2, alpha=0.2, name='l1')
+        
         return output3
 
 def max_pool(input, name = None):
     with tf.variable_scope(name, reuse = tf.AUTO_REUSE):
-        output = tf.layers.max_pooling2d(inputs = input, pool_size = (2, 2), strides = (2, 2), name = 'max-1')
+
+        output = tf.layers.max_pooling2d(inputs = input, pool_size = (2, 2), 
+                                         strides = (2, 2), name = 'max-1')
+        
         return output
 
 def up_pool(input, name = None):
     with tf.variable_scope(name, reuse = tf.AUTO_REUSE):
-        output = tf.image.resize_nearest_neighbor(input, [input.get_shape()[1] * 2, input.get_shape()[2] * 2])
+
+        output = tf.image.resize_nearest_neighbor(input, [input.get_shape()[1] * 2,
+                                                          input.get_shape()[2] * 2])
+
         return output 
 
 class encoder_G(object):
     def __init__(self, name = None):
         self.name = name
+        
     def forward(self, input):
         with tf.variable_scope(self.name, reuse = tf.AUTO_REUSE):
             
